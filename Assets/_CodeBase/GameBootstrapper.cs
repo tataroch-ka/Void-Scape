@@ -1,18 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
+using _CodeBase;
 using UnityEngine;
 
 public class GameBootstrapper : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    private void Awake()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        var gameLauncher = new GameLauncher();
+        gameLauncher.LaunchGame().Forget();
+            
+        Destroy(gameObject);
     }
 }
