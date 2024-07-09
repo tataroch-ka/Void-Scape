@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: LocalResources
+  m_EditorClassIdentifier: 
+  m_GroupName: LocalResources
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 25ef2fe731022ea44b93e20a2f1bc45d
+  m_SerializeEntries:
+  - m_GUID: cc10d0af4cb65c2479bfefdbef17f28f
+    m_Address: LevelConfig
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6f210e955afd22641900c5220d9adf5e
+    m_Address: CardPrefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9d9137e28e2521b47a461ce16d5faa3a
+    m_Address: LevelContainer
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: b78ed62627c8bb041ad79e8cb76c27f6, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 8660c7ae8317b4845af6deacf1b42851, type: 2}
+    - {fileID: 11400000, guid: f8242d995bfcf4d42afe510b7c1e0cda, type: 2}
