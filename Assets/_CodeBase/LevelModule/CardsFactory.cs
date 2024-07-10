@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using _CodeBase.Configs;
 using UnityEngine;
 
 namespace _CodeBase
@@ -9,22 +11,25 @@ namespace _CodeBase
     private readonly float _spacing;
     private readonly GameObject _cardPrefab;
     private readonly RectTransform _parent;
+    private readonly CardIdGenerator _idGenerator;
 
     public CardsFactory(
       int width, 
       int height,
       float spacing,
       GameObject cardPrefab, 
-      RectTransform parent)
+      RectTransform parent,
+      CardIdGenerator idGenerator)
     {
       _width = width;
       _height = height;
       _spacing = spacing;
       _cardPrefab = cardPrefab;
       _parent = parent;
+      _idGenerator = idGenerator;
     }
     
-    public void CreateCards()
+    public List<Card> CreateCards()
     {
       Vector2 cardSize = GetPrefabSize(_cardPrefab);
       
@@ -41,11 +46,14 @@ namespace _CodeBase
       float startX = -(_width * cardWidth * scale + (_width - 1) * _spacing) / 2f + cardWidth * scale / 2f;
       float startY = (_height * cardHeight * scale + (_height - 1) * _spacing) / 2f - cardHeight * scale / 2f;
 
-      InstantiateCards(startX, cardWidth, scale, startY, cardHeight);
+      List<Card> cards = InstantiateCards(startX, cardWidth, scale, startY, cardHeight);
+      
+      return cards;
     }
 
-    private void InstantiateCards(float startX, float cardWidth, float scale, float startY, float cardHeight)
+    private List<Card> InstantiateCards(float startX, float cardWidth, float scale, float startY, float cardHeight)
     {
+      List<Card> cards = new();
       for (var y = 0; y < _height; y++)
       {
         for (var x = 0; x < _width; x++)
@@ -54,17 +62,23 @@ namespace _CodeBase
           float posY = startY - y * (cardHeight * scale + _spacing);
 
           var position = new Vector3(posX, posY, 0);
-          InstantiateAndScaleCard(scale, position);
+          Card card = InstantiateAndScaleCard(scale, position);
+          cards.Add(card);
         }
       }
+
+      return cards;
     }
 
-    private void InstantiateAndScaleCard(float scale, Vector3 position)
+    private Card InstantiateAndScaleCard(float scale, Vector3 position)
     {
-      GameObject card = Object.Instantiate(_cardPrefab, _parent);
-      var rectTransform = card.GetComponent<RectTransform>();
+      var cardHierarchy = Object.Instantiate(_cardPrefab, _parent).GetComponent<CardHierarchy>();
+      var rectTransform = cardHierarchy.GetComponent<RectTransform>();
       rectTransform.localPosition = position;
       rectTransform.localScale = new Vector3(scale, scale, scale);
+      var card = new Card(cardHierarchy, _idGenerator.Generate());
+
+      return card;
     }
 
     private static Vector2 GetPrefabSize(GameObject prefab)
