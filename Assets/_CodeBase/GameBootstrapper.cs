@@ -5,9 +5,7 @@ public class GameBootstrapper : MonoBehaviour
 {
     private void Awake()
     {
-        var gameLauncher = new GameLauncher();
-        gameLauncher.LaunchGame().Forget();
-            
+        GameLauncher.LaunchGame().Forget();
         Destroy(gameObject);
     }
 }

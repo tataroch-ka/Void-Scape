@@ -10,22 +10,24 @@ namespace _CodeBase
     private readonly int _height;
     private readonly float _spacing;
     private readonly GameObject _cardPrefab;
-    private readonly RectTransform _parent;
+    private readonly RectTransform _container;
+    private readonly List<Sprite> _cardsShirts;
     private readonly CardIdGenerator _idGenerator;
 
-    public CardsFactory(
-      int width, 
+    public CardsFactory(int width,
       int height,
       float spacing,
-      GameObject cardPrefab, 
-      RectTransform parent,
+      GameObject cardPrefab,
+      RectTransform container,
+      List<Sprite> cardsShirts,
       CardIdGenerator idGenerator)
     {
       _width = width;
       _height = height;
       _spacing = spacing;
       _cardPrefab = cardPrefab;
-      _parent = parent;
+      _container = container;
+      _cardsShirts = cardsShirts;
       _idGenerator = idGenerator;
     }
     
@@ -36,8 +38,8 @@ namespace _CodeBase
       float cardWidth = cardSize.x;
       float cardHeight = cardSize.y;
       
-      float availableWidth = _parent.rect.width - _spacing * (_width - 1);
-      float availableHeight = _parent.rect.height - _spacing * (_height - 1);
+      float availableWidth = _container.rect.width - _spacing * (_width - 1);
+      float availableHeight = _container.rect.height - _spacing * (_height - 1);
 
       float scaleWidth = availableWidth / (_width * cardWidth);
       float scaleHeight = availableHeight / (_height * cardHeight);
@@ -69,14 +71,18 @@ namespace _CodeBase
 
       return cards;
     }
-
+    
     private Card InstantiateAndScaleCard(float scale, Vector3 position)
     {
-      var cardHierarchy = Object.Instantiate(_cardPrefab, _parent).GetComponent<CardHierarchy>();
+      var cardHierarchy = Object.Instantiate(_cardPrefab, _container).GetComponent<CardHierarchy>();
       var rectTransform = cardHierarchy.GetComponent<RectTransform>();
       rectTransform.localPosition = position;
       rectTransform.localScale = new Vector3(scale, scale, scale);
-      var card = new Card(cardHierarchy, _idGenerator.Generate());
+
+      int cardId = _idGenerator.Generate();
+      Sprite shirt = _cardsShirts[cardId];
+      
+      var card = new Card(cardHierarchy, shirt, cardId);
 
       return card;
     }

@@ -12,6 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8d6b71ecd25490f92c053433683a502, type: 3}
   m_Name: LevelConfig
   m_EditorClassIdentifier: 
-  _width: 4
+  _width: 3
   _height: 4
   _spacing: 50
+  _cardShirts:
+  - {fileID: 21300000, guid: 6430d0a704fed054ab657505d400c585, type: 3}
+  - {fileID: 21300000, guid: f9be5ccdbce0c6b4fa9e39f1b84c555a, type: 3}
+  - {fileID: 21300000, guid: d13d2ac86f9f35645a84984652fb11a5, type: 3}
+  - {fileID: 21300000, guid: 72a2cc93d0cbb2f46807237225a900b1, type: 3}
+  - {fileID: 21300000, guid: cb649577124fb5647841f448d37541b3, type: 3}
+  - {fileID: 21300000, guid: 34542a1fda2d908489738d3fd1f04eb3, type: 3}
+  - {fileID: 21300000, guid: 3a3e0cf8da0ff68438c47344f58d3378, type: 3}
+  - {fileID: 21300000, guid: 0c8bebd9c24bdba41bc4e7e5e60fac90, type: 3}
+  - {fileID: 21300000, guid: b8e5ef66f2e025c4f8b1e370a41bbcb2, type: 3}
+  - {fileID: 21300000, guid: 206d6251b7059754ebcc0278a7153668, type: 3}
+  - {fileID: 21300000, guid: 82061c5421acb2e47a0177b8d0cce3c7, type: 3}
+  - {fileID: 21300000, guid: 77dfaadbd1db0e74fbd032150b2f5f12, type: 3}
+  - {fileID: 21300000, guid: dd8eb921bcb20c046a9175743ef44137, type: 3}
+  - {fileID: 21300000, guid: d800629d057fe064f8a25ed066bb51d1, type: 3}
+  - {fileID: 21300000, guid: e1feb64c252f7ed4d9e11c7415cb36b9, type: 3}
+  - {fileID: 21300000, guid: 1be693cc2d6b17640ab32151195c534d, type: 3}
+  - {fileID: 21300000, guid: 61b146217a082bd4597806f5925cea24, type: 3}

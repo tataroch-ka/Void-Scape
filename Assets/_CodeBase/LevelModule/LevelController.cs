@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using _CodeBase.Configs;
 using Cysharp.Threading.Tasks;
@@ -13,13 +14,8 @@ namespace _CodeBase
     private const string LEVEL_CONFIG_KEY = "LevelConfig";
     private const string CARD_PREFAB_KEY = "CardPrefab";
     private const string LEVEL_CONTAINER_KEY = "LevelContainer";
-
-    private readonly UnityEventManager _eventManager;
-
-    public LevelController(UnityEventManager eventManager)
-    {
-      _eventManager = eventManager;
-    }
+    
+    private readonly Stack<Card> _pickedCards = new(); 
 
     public async UniTask PrepareLevelAsync()
     {
@@ -35,7 +31,7 @@ namespace _CodeBase
       return levelContainer;
     }
 
-    private static async UniTask CreateGameBoardAsync(RectTransform cardsContainer)
+    private async UniTask CreateGameBoardAsync(RectTransform cardsContainer)
     {
       List<Card> cards = await CreateCards(cardsContainer);
       BindCards(cards);
@@ -51,18 +47,46 @@ namespace _CodeBase
       
       return cards;
     }
-
-    private static void BindCards(List<Card> cards)
+    
+    private void BindCards(List<Card> cards)
     {
-      foreach (Card card in cards)
+      foreach (Card card in cards) 
+        card.OnClick += OnClickCardAsync;
+    }
+    
+    private async void OnClickCardAsync(Card card)
+    {
+      card.Flip();
+      if (_pickedCards.Count == 0)
       {
-        card.OnClick += OnClickCard;
+        _pickedCards.Push(card);
+        return;
       }
+      
+      await UniTask.WaitForSeconds(1);
+      if (_pickedCards.Count > 0) 
+        HandleCardMatch(card);
+      
+      _pickedCards.Clear();
     }
 
-    private static void OnClickCard(Card obj)
+    private void HandleCardMatch(Card card)
     {
-      Debug.LogError("Clicked: " + obj.ID);
+      if (_pickedCards.TryPop(out Card lastCard))
+      {
+        if (lastCard.ID == card.ID)
+        {
+          Debug.LogError("MATCH");
+          card.Hide();
+          lastCard.Hide();
+        }
+        else
+        {
+          Debug.LogError("NOT MATCH");
+          card.FlipBack();
+          lastCard.FlipBack();
+        }
+      }
     }
 
     private static CardsFactory CreateCardsFactory(
@@ -79,6 +103,7 @@ namespace _CodeBase
         levelConfig.Spacing,
         cardPrefab,
         cardsContainer,
+        levelConfig.CardShirts,
         idGenerator
        );
     }
