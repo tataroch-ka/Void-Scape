@@ -33,6 +33,13 @@ namespace _CodeBase
     
     public List<Card> CreateCards()
     {
+      int totalCount = _width * _height;
+      if (totalCount > _cardsShirts.Count * 2)
+      {
+        Debug.LogError($"Sprites count for shirts not enough in config to create {totalCount} cards.");
+        return new List<Card>();
+      }
+      
       Vector2 cardSize = GetPrefabSize(_cardPrefab);
       
       float cardWidth = cardSize.x;

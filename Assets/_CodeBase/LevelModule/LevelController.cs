@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using _CodeBase.Configs;
 using Cysharp.Threading.Tasks;
@@ -14,12 +13,28 @@ namespace _CodeBase
     private const string LEVEL_CONFIG_KEY = "LevelConfig";
     private const string CARD_PREFAB_KEY = "CardPrefab";
     private const string LEVEL_CONTAINER_KEY = "LevelContainer";
-    
-    private readonly Stack<Card> _pickedCards = new(); 
 
-    public async UniTask PrepareLevelAsync()
+    private List<Card> _levelCards;
+    private ScoreHandler _scoreHandler;
+    
+    private readonly ProgressSaver _progressSaver = new();
+    private readonly Stack<Card> _pickedCards = new();
+
+    public LevelController()
     {
+      
+    }
+
+    public async UniTask StartLevelAsync(SaveLevelData save = null)
+    {
+      if (save != null)
+      {
+        
+      }
+      
       LevelContainerHierarchy levelContainer = await InstantiateLevelContainer();
+      _scoreHandler = new ScoreHandler(levelContainer.HudHierarchy);
+      
       await CreateGameBoardAsync(levelContainer.CardsContainer);
     }
 
@@ -31,10 +46,10 @@ namespace _CodeBase
       return levelContainer;
     }
 
-    private async UniTask CreateGameBoardAsync(RectTransform cardsContainer)
+    private async UniTask CreateGameBoardAsync(RectTransform container)
     {
-      List<Card> cards = await CreateCards(cardsContainer);
-      BindCards(cards);
+      _levelCards = await CreateCards(container);
+      BindCards(_levelCards);
     }
 
     private static async Task<List<Card>> CreateCards(RectTransform cardsContainer)
@@ -50,43 +65,65 @@ namespace _CodeBase
     
     private void BindCards(List<Card> cards)
     {
-      foreach (Card card in cards) 
+      foreach (Card card in cards)
         card.OnClick += OnClickCardAsync;
     }
     
     private async void OnClickCardAsync(Card card)
     {
       card.Flip();
-      if (_pickedCards.Count == 0)
-      {
-        _pickedCards.Push(card);
+      _pickedCards.Push(card);
+
+      if (_pickedCards.Count % 2 != 0) 
         return;
-      }
       
+      Card firstCard = _pickedCards.Pop();
+      Card secondCard = _pickedCards.Pop();
+        
       await UniTask.WaitForSeconds(1);
-      if (_pickedCards.Count > 0) 
-        HandleCardMatch(card);
-      
-      _pickedCards.Clear();
+      if (firstCard.ID == secondCard.ID)
+      {
+        firstCard.Hide();
+        secondCard.Hide();
+        
+        _scoreHandler.CountMatch();
+      }
+      else
+      {
+        firstCard.FlipBack();
+        secondCard.FlipBack();
+        
+        _scoreHandler.CountTurn();
+      }
+
+      SaveLeveState();
     }
 
-    private void HandleCardMatch(Card card)
+    private void SaveLeveState()
     {
-      if (_pickedCards.TryPop(out Card lastCard))
+      List<SaveCardData> cardsData = new();
+      foreach (Card card in _levelCards)
       {
-        if (lastCard.ID == card.ID)
+        Vector3 position = card.GetPosition();
+        var saveCardData = new SaveCardData
         {
-          Debug.LogError("MATCH");
-          card.Hide();
-          lastCard.Hide();
-        }
-        else
-        {
-          Debug.LogError("NOT MATCH");
-          card.FlipBack();
-          lastCard.FlipBack();
-        }
+          ID = card.ID,
+          SpriteName = card.Shirt,
+          PosX = position.x,
+          PosY = position.y
+        };
+        
+        cardsData.Add(saveCardData);
       }
+      
+      SaveLevelData saveLevelData = new()
+      {
+        Matches = _scoreHandler.Matches,
+        Turns = _scoreHandler.Turns,
+        CardsOnTable = cardsData
+      };
+     
+      _progressSaver.SaveGame(saveLevelData);
     }
 
     private static CardsFactory CreateCardsFactory(
@@ -94,18 +131,39 @@ namespace _CodeBase
       LevelConfig levelConfig, 
       GameObject cardPrefab)
     {
-      int totalCount = levelConfig.Height * levelConfig.Width;
-      var idGenerator = new CardIdGenerator(totalCount, 2);
+      ValidateAndUpdateDimensions(levelConfig, out int height, out int width, out int totalCount);
+      var idGenerator = new CardIdGenerator(totalCount, levelConfig.RepeatCardCount);
       
       return new CardsFactory(
-        levelConfig.Height,
-        levelConfig.Width,
+        height,
+        width,
         levelConfig.Spacing,
         cardPrefab,
         cardsContainer,
         levelConfig.CardShirts,
         idGenerator
        );
+    }
+
+    private static void ValidateAndUpdateDimensions(LevelConfig levelConfig, out int height, out int width, out int totalCount)
+    {
+      height = levelConfig.Height;
+      width = levelConfig.Width;
+      totalCount = height * width;
+      
+      int repeatCardCount = levelConfig.RepeatCardCount;
+      if (totalCount % repeatCardCount == 0) 
+        return;
+      
+      Debug.LogWarning($"Odd number of cards detected. Height: {height}, Width: {width}. Adjusting to ensure pairs.");
+      while (totalCount % repeatCardCount != 0)
+      {
+        if (width >= height)
+          height++;
+        else
+          width++;
+        totalCount = height * width;
+      }
     }
   }
 }
