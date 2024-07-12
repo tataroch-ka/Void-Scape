@@ -1,11 +1,13 @@
-using _CodeBase;
 using UnityEngine;
 
-public class GameBootstrapper : MonoBehaviour
+namespace _CodeBase.Core
 {
+  public class GameBootstrapper : MonoBehaviour
+  {
     private void Awake()
     {
-        GameLauncher.LaunchGame().Forget();
-        Destroy(gameObject);
+      GameLauncher.LaunchGame().Forget();
+      Destroy(gameObject);
     }
+  }
 }

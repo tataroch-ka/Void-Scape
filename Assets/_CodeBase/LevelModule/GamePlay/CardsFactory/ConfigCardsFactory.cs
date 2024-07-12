@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using _CodeBase.Configs;
+using _CodeBase.LevelModule.Configs;
 using UnityEngine;
 
-namespace _CodeBase
+namespace _CodeBase.LevelModule.GamePlay.CardsFactory
 {
-  public class CardsFactory
+  public class ConfigCardsFactory : CardsFactory
   {
     private readonly int _width;
     private readonly int _height;
@@ -14,13 +14,13 @@ namespace _CodeBase
     private readonly List<Sprite> _cardsShirts;
     private readonly CardIdGenerator _idGenerator;
 
-    public CardsFactory(int width,
+    public ConfigCardsFactory(int width,
       int height,
       float spacing,
       GameObject cardPrefab,
       RectTransform container,
       List<Sprite> cardsShirts,
-      CardIdGenerator idGenerator)
+      CardIdGenerator idGenerator) : base(cardPrefab)
     {
       _width = width;
       _height = height;
@@ -31,7 +31,7 @@ namespace _CodeBase
       _idGenerator = idGenerator;
     }
     
-    public List<Card> CreateCards()
+    public override List<Card> CreateCards()
     {
       int totalCount = _width * _height;
       if (totalCount > _cardsShirts.Count * 2)

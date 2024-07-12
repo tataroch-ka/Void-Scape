@@ -1,22 +1,22 @@
 using System.IO;
+using _CodeBase.LevelModule.ProgressSaver.Entities;
 using UnityEngine;
 
-namespace _CodeBase
+namespace _CodeBase.LevelModule.ProgressSaver
 {
-  public class ProgressSaver
+  public static class ProgressSaver
   {
     private const string SAVE_DATA_JSON = "GameSave.json";
 
-    public void SaveGame(SaveLevelData saveLevelData)
+    public static void SaveGame(SaveLevelData saveLevelData)
     {
       string jsonSaveData = JsonUtility.ToJson(saveLevelData);
       string path = Path.Combine(Application.persistentDataPath, SAVE_DATA_JSON);
       
-      Debug.Log(path);
       File.WriteAllText(path, jsonSaveData);
     }
 
-    public bool TryLoadGame(out SaveLevelData saveLevelData)
+    public static bool TryGetSave(out SaveLevelData saveLevelData)
     {
       string path = Path.Combine(Application.persistentDataPath, SAVE_DATA_JSON);
       if (!File.Exists(path))

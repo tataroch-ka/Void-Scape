@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace _CodeBase
+namespace _CodeBase.LevelModule.ProgressSaver.Entities
 {
   [Serializable]
   public class SaveLevelData

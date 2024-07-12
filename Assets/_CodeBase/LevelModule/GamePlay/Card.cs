@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace _CodeBase
+namespace _CodeBase.LevelModule.GamePlay
 {
   public class Card
   {
@@ -35,7 +35,7 @@ namespace _CodeBase
     public void Hide() => 
       _hierarchy.gameObject.SetActive(false);
 
-    public Vector3 GetPosition() => 
-      _hierarchy.transform.position;
+    public Transform GetTransform() =>
+      _hierarchy.transform;
   }
 }

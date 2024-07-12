@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace _CodeBase.Configs
+namespace _CodeBase.LevelModule.Configs
 {
   [CreateAssetMenu(fileName = "LevelConfig", menuName = "Configuration/Level Config", order = 1)]
   public class LevelConfig : ScriptableObject

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8d6b71ecd25490f92c053433683a502, type: 3}
   m_Name: LevelConfig
   m_EditorClassIdentifier: 
-  _width: 3
+  _width: 4
   _height: 4
   _repeatCardCount: 2
   _spacing: 50

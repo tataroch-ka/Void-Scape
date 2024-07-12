@@ -1,9 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class CardsContainer : MonoBehaviour
+namespace _CodeBase.LevelModule.GamePlay
 {
+  public class CardsContainer : MonoBehaviour
+  {
     // Start is called before the first frame update
     void Start()
     {
@@ -15,4 +15,5 @@ public class CardsContainer : MonoBehaviour
     {
         
     }
+  }
 }

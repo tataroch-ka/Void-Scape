@@ -1,10 +1,14 @@
+using _CodeBase.LevelModule.UI;
 using UnityEngine;
 
-public class LevelContainerHierarchy : MonoBehaviour
+namespace _CodeBase.LevelModule
 {
-  [SerializeField] private RectTransform _cardsContainer;
-  [SerializeField] private HudHierarchy _hudHierarchy;
+  public class LevelContainerHierarchy : MonoBehaviour
+  {
+    [SerializeField] private RectTransform _cardsContainer;
+    [SerializeField] private HudHierarchy _hudHierarchy;
 
-  public RectTransform CardsContainer => _cardsContainer;
-  public HudHierarchy HudHierarchy => _hudHierarchy;
+    public RectTransform CardsContainer => _cardsContainer;
+    public HudHierarchy HudHierarchy => _hudHierarchy;
+  }
 }

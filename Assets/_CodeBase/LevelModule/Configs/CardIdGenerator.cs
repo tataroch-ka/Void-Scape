@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace _CodeBase.Configs
+namespace _CodeBase.LevelModule.Configs
 {
   public class CardIdGenerator
   {

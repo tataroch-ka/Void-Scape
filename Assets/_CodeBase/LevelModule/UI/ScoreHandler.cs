@@ -1,4 +1,4 @@
-namespace _CodeBase
+namespace _CodeBase.LevelModule.UI
 {
   public class ScoreHandler
   {
@@ -15,10 +15,10 @@ namespace _CodeBase
       _hudHierarchy = hudHierarchy;
     }
 
-    public void CountMatch() => 
-      _hudHierarchy.MatchScore.text = $"{MATCHES}: {++Matches}";
+    public void AddMatch(int count) => 
+      _hudHierarchy.MatchScore.text = $"{MATCHES}: {Matches+=count}";
 
-    public void CountTurn() => 
-      _hudHierarchy.TurnScore.text = $"{TURNS}: {++Turns}";
+    public void AddTurn(int count) => 
+      _hudHierarchy.TurnScore.text = $"{TURNS}: {Turns+=count}";
   }
 }

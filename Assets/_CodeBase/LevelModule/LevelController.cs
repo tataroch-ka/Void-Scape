@@ -1,12 +1,16 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using _CodeBase.Configs;
+using _CodeBase.LevelModule.Configs;
+using _CodeBase.LevelModule.GamePlay;
+using _CodeBase.LevelModule.GamePlay.CardsFactory;
+using _CodeBase.LevelModule.ProgressSaver.Entities;
+using _CodeBase.LevelModule.UI;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using Object = UnityEngine.Object;
 
-namespace _CodeBase
+namespace _CodeBase.LevelModule
 {
   public class LevelController
   {
@@ -17,25 +21,33 @@ namespace _CodeBase
     private List<Card> _levelCards;
     private ScoreHandler _scoreHandler;
     
-    private readonly ProgressSaver _progressSaver = new();
     private readonly Stack<Card> _pickedCards = new();
-
-    public LevelController()
-    {
-      
-    }
+    private LevelContainerHierarchy _levelContainer;
+    private SoundManager _soundManager;
 
     public async UniTask StartLevelAsync(SaveLevelData save = null)
     {
+      _levelContainer = await InstantiateLevelContainer();
+      _scoreHandler = new ScoreHandler(_levelContainer.HudHierarchy);
+      _soundManager = Object.FindObjectOfType<SoundManager>();
+      
+      var cardPrefab = await Addressables.LoadAssetAsync<GameObject>(CARD_PREFAB_KEY);
+      var levelConfig = await Addressables.LoadAssetAsync<LevelConfig>(LEVEL_CONFIG_KEY);
+
+      CardsFactory configCardsFactory;
       if (save != null)
       {
-        
+        configCardsFactory = CreateSaveCardsFactory(_levelContainer.CardsContainer, save, cardPrefab);
+        _scoreHandler.AddMatch(save.Matches);
+        _scoreHandler.AddTurn(save.Turns);
+      }
+      else
+      {
+        configCardsFactory = CreateConfigCardsFactory(_levelContainer.CardsContainer, levelConfig, cardPrefab);
       }
       
-      LevelContainerHierarchy levelContainer = await InstantiateLevelContainer();
-      _scoreHandler = new ScoreHandler(levelContainer.HudHierarchy);
-      
-      await CreateGameBoardAsync(levelContainer.CardsContainer);
+      _levelCards = configCardsFactory.CreateCards();
+      BindCards(_levelCards);
     }
 
     private static async Task<LevelContainerHierarchy> InstantiateLevelContainer()
@@ -44,23 +56,6 @@ namespace _CodeBase
       var levelContainer = Object.Instantiate(levelContainerPrefab).GetComponent<LevelContainerHierarchy>();
       
       return levelContainer;
-    }
-
-    private async UniTask CreateGameBoardAsync(RectTransform container)
-    {
-      _levelCards = await CreateCards(container);
-      BindCards(_levelCards);
-    }
-
-    private static async Task<List<Card>> CreateCards(RectTransform cardsContainer)
-    {
-      var cardPrefab = await Addressables.LoadAssetAsync<GameObject>(CARD_PREFAB_KEY);
-      var levelConfig = await Addressables.LoadAssetAsync<LevelConfig>(LEVEL_CONFIG_KEY);
-      
-      CardsFactory cardsFactory = CreateCardsFactory(cardsContainer, levelConfig, cardPrefab);
-      List<Card> cards = cardsFactory.CreateCards();
-      
-      return cards;
     }
     
     private void BindCards(List<Card> cards)
@@ -72,8 +67,9 @@ namespace _CodeBase
     private async void OnClickCardAsync(Card card)
     {
       card.Flip();
+      _soundManager.PlayFlip();
+      
       _pickedCards.Push(card);
-
       if (_pickedCards.Count % 2 != 0) 
         return;
       
@@ -83,17 +79,26 @@ namespace _CodeBase
       await UniTask.WaitForSeconds(1);
       if (firstCard.ID == secondCard.ID)
       {
+        _soundManager.PlayMatch();
+        _scoreHandler.AddMatch(1);
+        
         firstCard.Hide();
         secondCard.Hide();
         
-        _scoreHandler.CountMatch();
+        if (_scoreHandler.Matches >= _levelCards.Count / 2)
+        {
+          _soundManager.PlayGameOver();
+          await FinishWindowPresenter.ShowAsync();
+        }
       }
       else
       {
+        _soundManager.PlayMissMatch();
+        
         firstCard.FlipBack();
         secondCard.FlipBack();
         
-        _scoreHandler.CountTurn();
+        _scoreHandler.AddTurn(1);
       }
 
       SaveLeveState();
@@ -104,13 +109,20 @@ namespace _CodeBase
       List<SaveCardData> cardsData = new();
       foreach (Card card in _levelCards)
       {
-        Vector3 position = card.GetPosition();
+        Transform transform = card.GetTransform();
+        
+        Vector3 localScale = transform.localScale;
+        Vector3 position = transform.position;
+        bool isActive = transform.gameObject.activeSelf;
+        
         var saveCardData = new SaveCardData
         {
           ID = card.ID,
           SpriteName = card.Shirt,
           PosX = position.x,
-          PosY = position.y
+          PosY = position.y,
+          LocalScale = localScale,
+          IsActive = isActive
         };
         
         cardsData.Add(saveCardData);
@@ -123,18 +135,18 @@ namespace _CodeBase
         CardsOnTable = cardsData
       };
      
-      _progressSaver.SaveGame(saveLevelData);
+      ProgressSaver.ProgressSaver.SaveGame(saveLevelData);
     }
 
-    private static CardsFactory CreateCardsFactory(
-      RectTransform cardsContainer, 
+    private static CardsFactory CreateConfigCardsFactory(
+      RectTransform cardsContainer,
       LevelConfig levelConfig, 
       GameObject cardPrefab)
     {
       ValidateAndUpdateDimensions(levelConfig, out int height, out int width, out int totalCount);
       var idGenerator = new CardIdGenerator(totalCount, levelConfig.RepeatCardCount);
       
-      return new CardsFactory(
+      return new ConfigCardsFactory(
         height,
         width,
         levelConfig.Spacing,
@@ -143,6 +155,19 @@ namespace _CodeBase
         levelConfig.CardShirts,
         idGenerator
        );
+    }
+    
+    private static CardsFactory CreateSaveCardsFactory(
+      RectTransform cardsContainer, 
+      SaveLevelData saveData, 
+      GameObject cardPrefab)
+    {
+      
+      return new SaveCardsFactory(
+        cardsContainer,
+        saveData,
+        cardPrefab
+      );
     }
 
     private static void ValidateAndUpdateDimensions(LevelConfig levelConfig, out int height, out int width, out int totalCount)
